@@ -354,6 +354,8 @@ expressao_acesso
             // Busca esse campo na lista de campos 
             // se nao encontrar , erro
             // guardar o tam, des e tip desse campo
+            // o tipo nesse caso e a posição do tipo 
+            // na tabela de simbolos
             }
             else {
                
