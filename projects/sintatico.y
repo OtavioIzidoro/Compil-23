@@ -83,11 +83,21 @@ cabecalho
 
 tipo
     : T_LOGICO
-        {tipo = LOG;}
+        {tipo = LOG;
+
+        //Guardar Tamanho da variavel
+        //Guardar Posição na tabela de simbolo
+        }
     | T_INTEIRO
-        { tipo = INT;} 
+        { tipo = INT;
+        //Idem
+        } 
     | T_REGISTRO T_IDENTIF
-        { tipo = REG;}
+        { tipo = REG;
+        //TODO #4
+        //Aqui tem uma chamada de buscaSimbolo para encontrar
+        // as informações de TAM e POS
+        }
     ;
 
 define_registro
@@ -96,7 +106,17 @@ define_registro
     ;
 
 define
-    : T_DEF definicao_campos T_FIMDEF T_IDENTIF
+    : T_DEF
+        {
+            //TODO #1
+            //Inicia a lista de campos
+        }
+    definicao_campos T_FIMDEF T_IDENTIF
+    {
+        //TODO #2
+        //Inserir esse novo tipo na tabela de simbolos
+        //com a lista montada
+    }
     ;
 
 definicao_campos
@@ -126,8 +146,13 @@ lista_variaveis
             strcpy(elemTab.id, atomo);
             elemTab.end = contaVar;
             elemTab.tip = tipo;
+            // TODO #6
+            //Tem outros campos para acrescentar na tab. Simbolos
             insereSimbolo (elemTab);
             contaVar++; 
+            //TODO #5
+            // Se a variavel for registro
+            // contaVar = contaVar + TAM (tamanho do registro)
 
         } 
     
@@ -162,6 +187,9 @@ entrada
     : T_LEIA T_IDENTIF
         {   
             int pos = buscaSimbolo(atomo);
+            //TODO #7
+            //Se for registro, tem que fazer uma repetiçãp do
+            // TAM do registro de leituras
             fprintf(yyout, "\tLEIA\n"); 
             fprintf(yyout, "\tARZG\t%d\n", tabSimb[pos].end); 
         }
@@ -171,7 +199,12 @@ saida
     : T_ESCREVA expressao
         { 
             desempilha();
+
+            //TODO #8
+            // Se for registro, tem que fa'zer uma repetição do
+            // TAM do registro de escritas
             fprintf(yyout, "\tESCR\n"); 
+
         }
 
     ;
@@ -181,6 +214,8 @@ atribuicao
         { 
             int pos = buscaSimbolo(atomo);
             empilha(pos);
+  
+
         }
     T_ATRIB expressao
         { 
@@ -188,6 +223,9 @@ atribuicao
             int pos = desempilha();
             if(tabSimb[pos].tip != tip)
                 yyerror("Incompatibilidade de tipo!");
+                          //TODO #9
+            // Se for registro, tem que fazer uma repetição do
+            // TAM do registro de ARZG
             fprintf(yyout, "\tARZG\t%d\n", tabSimb[pos].end); 
         }
     ;
@@ -289,29 +327,54 @@ expressao
     ;
 
 expressao_acesso
-    : T_IDENTIF
+    | T_IDPONTO 
+        {   
+            // Primeiro nome do registro
+            if (!ehRegistro){
+                ehRegistro = 1;
+                //TODO #10 
+                // busca o simbolo na tabela de simbolos
+                // se não for registro, tem erro
+                // guardar o tam, pos, deslocamento desse simbolo T_IDENTIF
+
+            } else{
+                // campo que eh registro 
+                // Busca o campo na lista de campos 
+                // se nao encontrar , erro
+                // se nao for registro e nao encontrar, erro
+                // guardar o tam, pos, deslocamento desse CAMPO
+            }
+        }
+        expressao_acesso
+    | T_IDENTIF
         { 
             if(ehRegistro){
-                empilha(REG);
+
+            //TODO #11
+            // Busca esse campo na lista de campos 
+            // se nao encontrar , erro
+            // guardar o tam, des e tip desse campo
             }
             else {
-                int pos = buscaSimbolo(atomo);
-                fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end); 
-                empilha(tabSimb[pos].tip);
-                
+               
+             //TODO #12
+               int pos = buscaSimbolo(atomo);    
+               // guarda o tam, des e tip dessa variavel
+               
+
             }
             ehRegistro = 0;
         }
-    | T_IDPONTO 
-        {
-            if (!ehRegistro)
-                ehRegistro = 1;
-        }
-    expressao_acesso
-    ;
 
 termo
     : expressao_acesso
+    {
+                //TODO #13
+                // Se for registro, tem que fazer uma repetição do
+                // TAM do registro de CRZG (em ordem inversa)
+                fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end); 
+                empilha(tabSimb[pos].tip);
+    }
     | T_NUMERO
         { 
             fprintf(yyout, "\tCRCT\t%s\n", atomo); 

@@ -10,6 +10,9 @@ struct elemTabSimbolos {
     char id[100];   // nome do identificador
     int end;        // endereco
     int tip;        // tipo
+    int tam;         //tamaho
+    int pos;         //posicao
+
 } tabSimb[TAM_TAB], elemTab;
 
 enum{
@@ -50,7 +53,7 @@ void insereSimbolo (struct elemTabSimbolos elem){
     if (i != -1)
     {
         char msg[200];
-        sprintf(msg, "Identificador [%s] não encontrado!", elem.id);
+        sprintf(msg, "Identificador [%projectss] não encontrado!", elem.id);
         yyerror(msg);
     }
     tabSimb[posTab++] = elem;
@@ -60,7 +63,7 @@ void insereSimbolo (struct elemTabSimbolos elem){
 void mostraTabela () {
     puts ("TABELA DE SIMBOLOS");
     puts ("------------------");
-    printf("%30s | %s | %s\n", "ID", "END", "TIP");
+    printf("%30s | %s | %s\n", "ID", "END", "TIP", "TAM", "POS" );
     for (int i = 0; i < 50; i++)
         printf("-");
     for (int i = 0; i < posTab; i++){
