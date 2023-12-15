@@ -1,4 +1,18 @@
 %{
+/* 
+   +=============================================================
+   |           UNIFAL - Universidade Federal de Alfenas.
+   |               BACHARELADO EM CIENCIA DA COMPUTACAO.
+   | Trabalho..: R e gi s t r o e v e r i f i c a c a o de t i p o s
+   | Disciplina: Teoria de Linguagens e Compiladores
+   | Professor.: Luiz Eduardo da Silva
+   | Aluno.....: Davi C. Bernardes - 2019.1.08.021
+   | Data......: 15/12/2023
+   +============================================================= 
+*/    
+%}
+
+%{
    #include "sintatico.h"
    int yyerror(char *);
    int numLinha = 1;
@@ -50,13 +64,13 @@ nao                  return T_NAO;
 "("                  return T_ABRE;
 ")"                  return T_FECHA;
 
-inteiro              return T_INTEIRO;
-logico               return T_LOGICO;
+inteiro              return T_INTEIRO; 
+logico               return T_LOGICO; 
 registro             return T_REGISTRO;
 V                    return T_V;
 F                    return T_F;
 
-"#".*                /* nada */
+"//".*                /* nada */
 "/*"                 BEGIN(coment);
 <coment>"*/"         BEGIN(INITIAL);
 <coment>.            /* nada */
