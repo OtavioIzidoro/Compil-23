@@ -7,10 +7,10 @@
     | Disciplina: Teoria de Linguagens e Compiladores
     | Professor.: Luiz Eduardo da Silva
     | Aluno.....: Davi C. Bernardes - 2019.1.08.021
-    | Aluno.....: Otavio A. M. Izidoro - 2018.1.08.041
+    | Aluno.....: Otávio Augusto Marcelino Izidoro - 2018.1.08.041
     | Data......: 15/12/2023
     +=============================================================
-*/    
+*/ 
 %}
 
 %{
@@ -24,7 +24,7 @@
     int contaVar = 0;
     int rotulo = 0;
     int ehRegistro = 0;
-    int ehVariavel = 0;
+    int ehVariavel = 1;
     int tipo;
     int tam = 0;
     int pos = 0;
@@ -32,6 +32,7 @@
     int ultimoReg = 2;
     ptno l;
     int inicia = 0;
+    int naoEhRegistro = 0;
     
 %}
 
@@ -234,7 +235,7 @@ lista_variaveis
             elemTab.tip = tipo;
             elemTab.pos = pos;
             elemTab.tam = tam;
-            
+            elemTab.campos = tabSimb[pos].campos;
             insereSimbolo (elemTab);
             if(tipo == REG){
                 contaVar = contaVar + tam;
@@ -253,7 +254,7 @@ lista_variaveis
             elemTab.tip = tipo;
             elemTab.pos = pos;
             elemTab.tam = tam;
-            // tem outros campos para acrescentar na tab. simbolos
+            elemTab.campos = tabSimb[pos].campos;
             insereSimbolo (elemTab);
             if(tipo == REG){
                 contaVar = contaVar + tam;
@@ -447,7 +448,7 @@ expressao_acesso
                     dsl = tabSimb[pos].end;
                 }else {
                     char msg[200];
-                    sprintf(msg, "Simbolo não é do tipo registro");
+                    sprintf(msg, "O identificador [%s] não é registro!", atomo);
                     yyerror(msg);
                 }
             
@@ -491,9 +492,6 @@ expressao_acesso
             if(ehRegistro){
 
                 int pos = buscaCampo(atomo);
-                
-                
-                
 
                 ptno campo = (ptno)malloc(sizeof(struct camposTabSimbolos));
                 campo = busca(tabSimb[pos].campos, atomo);
@@ -516,7 +514,7 @@ expressao_acesso
             else {
                 //TODO #14
                 int pos = buscaSimbolo(atomo);
-                ehVariavel = 1;
+                naoEhRegistro = 1;
                 tam = tabSimb[pos].tam;
                 dsl = tabSimb[pos].end;
                 tipo = tabSimb[pos].tip;
@@ -532,43 +530,26 @@ expressao_acesso
 termo
     : expressao_acesso
     {
-       
-       
-        
-   
-                // ptno campo = (ptno)malloc(sizeof(struct camposTabSimbolos));
-       
-        printf("ehvariavel %d\n", ehVariavel);
-       
-        printf("dsl %d\n", dsl);
-        printf("tam %d\n", tam);
-        printf("tipo %d\n", tipo);
-      
-        printf("atomo %s\n", atomo);
-
-
 
           // TODO #15
           // Se for registro, tem que fazer uma repetição do
           // TAM do registro de CRVG (em ondem inversa)
 
-            if(ehVariavel == 1){
-                for(int i = (tam - 1); i >= 0; i--){
-                    fprintf(yyout, "\tCRVG\t%d\n", dsl + i); 
-                }
-            }
-            else{
-                int teste = buscaCampo(atomo);
-                printf("tabelaSimbolos %d\n", tabSimb[teste].pos);
+             if(naoEhRegistro == 1){
+                 for(int i = (tam - 1); i >= 0; i--){
+                     fprintf(yyout, "\tCRVG\t%d\n", dsl + i); 
+                 }
+             }
+             else{
+                 int teste = buscaCampo(atomo);
                 for(int i = tam ; i > 0; i--){
-                fprintf(yyout, "\tCRVG\t%d\n",  tabSimb[teste].pos + i ); 
-             
-            }
-            }
+                    fprintf(yyout, "\tCRVG\t%d\n",  tabSimb[teste].end + dsl + (i - 1) ); 
+                }
+             }
 
           
         empilha(tipo); 
-         ehVariavel = 0;  
+          naoEhRegistro = 0;  
     }
     | T_NUMERO
         { 

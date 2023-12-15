@@ -6,6 +6,7 @@
     | Disciplina: Teoria de Linguagens e Compiladores
     | Professor.: Luiz Eduardo da Silva
     | Aluno.....: Davi C. Bernardes - 2019.1.08.021
+    | Aluno.....: Otávio Augusto Marcelino Izidoro - 2018.1.08.041
     | Data......: 15/12/2023
     +=============================================================
 */ 
@@ -135,7 +136,7 @@ int buscaCampo (char *s){
 
     if(i == -1){
         char msg[200];
-        sprintf(msg, "Identificador [%s] não encontrado na busca Campo!", s);
+        sprintf(msg, "Identificador [%s] não é registro!", s);
         yyerror(msg);
     }
     
