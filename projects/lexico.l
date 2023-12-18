@@ -1,16 +1,16 @@
 %{
-/*  
-    +=============================================================
-    |           UNIFAL - Universidade Federal de Alfenas.
-    |               BACHARELADO EM CIENCIA DA COMPUTACAO.
-    | Trabalho..: R e gi s t r o e v e r i f i c a c a o de t i p o s
-    | Disciplina: Teoria de Linguagens e Compiladores
-    | Professor.: Luiz Eduardo da Silva
-    | Aluno.....: Davi C. Bernardes - 2019.1.08.021
-    | Aluno.....: Otávio Augusto Marcelino Izidoro - 2018.1.08.041
-    | Data......: 15/12/2023
-    +=============================================================
-*/ 
+/* 
+   +=============================================================
+   |           UNIFAL - Universidade Federal de Alfenas.
+   |               BACHARELADO EM CIENCIA DA COMPUTACAO.
+   | Trabalho..: R e gi s t r o e v e r i f i c a c a o de t i p o s
+   | Disciplina: Teoria de Linguagens e Compiladores
+   | Professor.: Luiz Eduardo da Silva
+   | Aluno.....: Davi C. Bernardes - 2019.1.08.021
+   | Aluno.....: Otávio Augusto Marcelino Izidoro - 2018.1.08.041
+   | Data......: 15/12/2023
+   +============================================================= 
+*/    
 %}
 
 %{

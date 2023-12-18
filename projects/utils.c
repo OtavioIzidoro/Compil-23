@@ -2,7 +2,7 @@
     +=============================================================
     |           UNIFAL - Universidade Federal de Alfenas.
     |               BACHARELADO EM CIENCIA DA COMPUTACAO.
-    | Trabalho..: R e gi s t r o e v e r i f i c a c a o de t i p o s
+    | Trabalho..: Registro e verificacao de tipos
     | Disciplina: Teoria de Linguagens e Compiladores
     | Professor.: Luiz Eduardo da Silva
     | Aluno.....: Davi C. Bernardes - 2019.1.08.021
@@ -38,6 +38,16 @@ struct elemTabSimbolos {
     ptno campos; 
 } tabSimb[TAM_TAB], elemTab;
 
+typedef struct posicaoMemoria *ptno2;
+
+struct posicaoMemoria
+{
+    char id[100];
+    int posMemoria;
+    ptno2 prox;
+};
+
+
 enum{
     INT,
     LOG,
@@ -53,6 +63,43 @@ char nomeTipo[3][4] = {"INT", "LOG", "REG"};
 int posTab = 0; // indica a proxima posicao livre para inserir
 int posLista = 0; // indica a proxima posicao livre para inserir
 
+ptno2 posicaoMemoria(ptno2 l, char id[100], int pos){
+    int i;
+    ptno2 p, novo;
+    ptno2 campo;
+    novo = (ptno2)malloc(sizeof(struct posicaoMemoria));
+
+    // if (busca(l, id) != NULL) {
+    //     char msg[200];
+    //     sprintf(msg, "Campo [%s] ja existe no registro.\n", id);
+    //     yyerror(msg);
+    // }
+
+    strcpy(novo->id, id);
+    novo->posMemoria = pos;
+    novo->prox = NULL;
+    p = l;
+    while(p && p->prox)
+    {
+        p = p->prox;
+    }
+    if (p)
+    {
+        p->prox = novo;
+    }else{
+        l = novo;
+    }
+    return l;
+}
+//posicao na memoria nao e usado no codigo, mas e uma lista encadeada que guarda o nome do campo e a posicao na memoria
+
+int buscaMemoria(ptno2 l, char id[100]){
+    while(l && strcmp(l->id, id)!= 0){
+        l = l->prox;
+    }
+    return l->posMemoria;
+}
+// buscaMemoria nao e usado no codigo, mas e uma lista encadeada que guarda o nome do campo e a posicao na memoria
 
 ptno busca(ptno l, char id[100]){
     while(l && strcmp(l->id, id)!= 0){
@@ -60,6 +107,7 @@ ptno busca(ptno l, char id[100]){
     }
     return l;
 }
+//busca se op atomo esta la na lista se tiver retorna o ponteiro para o elemento se nao retorna null
 
 ptno insere(ptno l,char id[100], int tip, int pos, int dsl, int tam) {
     //tratar o problema de campo repetido, com o mesmo nome.
@@ -94,7 +142,19 @@ ptno insere(ptno l,char id[100], int tip, int pos, int dsl, int tam) {
     return l;
 }
 
+void mostra2(ptno2 l) {
+    while (l) 
+    {
+        if(l->prox){
+            printf("(%s, %d)=> ", l->id,  l->posMemoria);
+        }else{
+            printf("(%s, %d) ", l->id, l->posMemoria);
+        }
+        l = l->prox;
+    }
 
+}
+// nao e usado no codigo
 
 void mostra(ptno l) {
     while (l) 
@@ -108,6 +168,7 @@ void mostra(ptno l) {
     }
 
 }
+// mostra a lista de campos
 
 
 int buscaSimbolo (char *s){
@@ -121,6 +182,7 @@ int buscaSimbolo (char *s){
     }
     return i;
 }
+//busca simbolo verifica se o simbolo esta na tabela de simbolos se tiver retorna a posicao se nao ele retorna erro
 
 int buscaCampo (char *s){
     int i;
@@ -136,12 +198,15 @@ int buscaCampo (char *s){
 
     if(i == -1){
         char msg[200];
-        sprintf(msg, "Identificador [%s] não é registro!", s);
+        sprintf(msg, "O campo [%s] não existe na estrutura", s);
         yyerror(msg);
     }
     
     return i;
 }
+
+// busca campo na tabela de simbolos vendo qual a variavel que e do tipo registro e depois busca o 
+// campo dentro do registro retornando a posicao do campo
 
 
 
@@ -201,10 +266,17 @@ void empilha (int valor){
     pilha[++topo] = valor;
 }
 
+
 int desempilha (){
     if (topo == -1)
         yyerror("Pilha vazia!");
     return pilha[topo--];
+}
+
+void mostraPilha(){
+    for(int i = 0; i < topo;i++){
+        printf("pilha = %d na posicao[%d]\n", pilha[i], i);
+    }
 }
 
 // tipo1 e tipo2 são os tipos esperados na expressão 
@@ -227,3 +299,4 @@ int calculaTamanho(ptno l){
 
     return tamanho;
 }
+ // ela calcula o tamanho da lista somando mais um retornando o tamanho do registro

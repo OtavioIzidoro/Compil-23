@@ -21,18 +21,17 @@
     #include "lexico.c"
     #include "utils.c"
 
-    int contaVar = 0;
-    int rotulo = 0;
-    int ehRegistro = 0;
-    int ehVariavel = 1;
-    int tipo;
-    int tam = 0;
-    int pos = 0;
-    int dsl = 0;
-    int ultimoReg = 2;
-    ptno l;
-    int inicia = 0;
-    int naoEhRegistro = 0;
+    int contaVar = 0; //contar o endereco das variaveis
+    int rotulo = 0; //contar os rotulos
+    int ehRegistro = 0; //flag para saber se eh registro
+
+    int tipo;   //tipo da variavel
+    int tam = 0;   //tamanho da variavel
+    int pos = 0;    //posicao da variavel
+    int dsl = 0;   //deslocamento da variavel
+    int ultimoReg = 2; //posicao do ultimo registro na tabela de simbolos
+    ptno l; //lista de campos do registro
+    int naoEhRegistro = 0; //flag para saber se nao eh registro
     
 %}
 
@@ -101,6 +100,9 @@ programa
         {   fprintf(yyout, "\tFIMP\n"); }
     ;
 
+    // programa local onde gera instruções para o inicio e fim do programa como
+    // quantidade de variaveis e instruções para o inicio e fim do programa
+
 cabecalho
     : T_PROGRAMA T_IDENTIF
         { 
@@ -124,6 +126,9 @@ cabecalho
 
         }
     ;
+
+    // cabecalho local onde gera instruções para o inicio do programa so que ja definindo
+    // os tipos inteiro e logico nas posições 0 e 1 da tabela de simbolos
 
 tipo
     : T_LOGICO
@@ -163,27 +168,28 @@ define_registro
 
 define
     : T_DEF 
-    {
-        //TODO#3
-        //iniciar a lista de campos
-        l = NULL;
-        dsl = 0;
-    }
+        {
+            //TODO#3
+            //iniciar a lista de campos
+            l = NULL;
+            dsl = 0; //deslocamento do campo
+        }
     definicao_campos T_FIMDEF T_IDENTIF
-    {
-        //#TODO4
-        
-        strcpy(elemTab.id, atomo);
-        elemTab.end = -1;
-        elemTab.tip = REG;
-        elemTab.tam = calculaTamanho(l);
-        elemTab.pos = ultimoReg;
-        elemTab.campos = l;
-        insereSimbolo(elemTab);
-        ultimoReg++;
-        //inserir esse novo tipo na tabela de simbolos (insereSimbolo)
-        // com a lista que foi montada
-    }
+        {
+            //#TODO4
+            
+            strcpy(elemTab.id, atomo);
+            elemTab.end = -1;
+            elemTab.tip = REG;
+            elemTab.tam = calculaTamanho(l); //calcula o tamanho do registro
+            elemTab.pos = ultimoReg;
+            elemTab.campos = l;
+            insereSimbolo(elemTab); //insere o registro na tabela de simbolos
+            ultimoReg++; //atualiza a posicao do ultimo registro na tabela de simbolos
+
+            //inserir esse novo tipo na tabela de simbolos (insereSimbolo)
+            // com a lista que foi montada
+        }
     ;
 
 definicao_campos
@@ -193,27 +199,32 @@ definicao_campos
 
 lista_campos
     : lista_campos T_IDENTIF
-    {
-        
-        // TODO #5
-        // acrescentar esse campo na lista de campos que
-        // esta sendo construida
-        // o deslocamento (esdereço) do proximo campo
-        // sera o deslocamento anterior mais o tamanho desse campos
-        l = insere(l, atomo, tipo, pos, dsl, tam);
-        dsl = dsl + tam;
-    }
-    | T_IDENTIF
-    {
-        // TODO #5
-        // acrescentar esse campo na lista de campos que
-        // esta sendo construida
-        // o deslocamento (esdereço) do proximo campo
-        // sera o deslocamento anterior mais o tamanho desse campos
+        {
+            
+            // TODO #5
+            // acrescentar esse campo na lista de campos que
+            // esta sendo construida
+            // o deslocamento (esdereço) do proximo campo
+            // sera o deslocamento anterior mais o tamanho desse campos
+            l = insere(l, atomo, tipo, pos, dsl, tam);
+            dsl = dsl + tam;
 
-        l = insere(l, atomo, tipo, pos, dsl, tam);
-        dsl = dsl + tam;
-    }
+            // guarda o id o tipo a posicao e o deslocamento e o tamanho do campo no final da lista
+
+        }
+    | T_IDENTIF
+        {
+            // TODO #5
+            // acrescentar esse campo na lista de campos que
+            // esta sendo construida
+            // o deslocamento (esdereço) do proximo campo
+            // sera o deslocamento anterior mais o tamanho desse campos
+
+            l = insere(l, atomo, tipo, pos, dsl, tam);
+            dsl = dsl + tam;
+
+            // guarda o id o tipo a posicao e o deslocamento e o tamanho do campo no final da lista
+        }
     ;
 
 variaveis
@@ -288,7 +299,9 @@ entrada_saida
 entrada
     : T_LEIA expressao_acesso
         {    
-            // TODO #8
+            // TODO #8 
+            // Se for registro, tem que fazer uma repetição do
+            // TAM do registro de leituras
             for(int i = 0; i < tam; i++){
                 fprintf(yyout, "\tLEIA\n"); 
                 fprintf(yyout, "\tARZG\t%d\n", dsl + i); 
@@ -440,12 +453,12 @@ expressao_acesso
             if (!ehRegistro){
   
                 ehRegistro = 1;
-                int pos = buscaSimbolo(atomo);
+                int posicao = buscaSimbolo(atomo);
 
-                if(tabSimb[pos].tip == REG){
-                    tam = tabSimb[pos].tam;
-                    pos = tabSimb[pos].pos;
-                    dsl = tabSimb[pos].end;
+                if(tabSimb[posicao].tip == REG){
+                    tam = tabSimb[posicao].tam;
+                    pos = tabSimb[posicao].pos;
+                    dsl = tabSimb[posicao].end;
                 }else {
                     char msg[200];
                     sprintf(msg, "O identificador [%s] não é registro!", atomo);
@@ -531,25 +544,23 @@ termo
     : expressao_acesso
     {
 
-          // TODO #15
-          // Se for registro, tem que fazer uma repetição do
-          // TAM do registro de CRVG (em ondem inversa)
+        // TODO #15
+        // Se for registro, tem que fazer uma repetição do
+        // TAM do registro de CRVG (em ondem inversa)
 
-             if(naoEhRegistro == 1){
-                 for(int i = (tam - 1); i >= 0; i--){
-                     fprintf(yyout, "\tCRVG\t%d\n", dsl + i); 
-                 }
-             }
-             else{
-                 int teste = buscaCampo(atomo);
-                for(int i = tam ; i > 0; i--){
-                    fprintf(yyout, "\tCRVG\t%d\n",  tabSimb[teste].end + dsl + (i - 1) ); 
-                }
-             }
-
-          
+        if(naoEhRegistro == 1){
+            for(int i = (tam - 1); i >= 0; i--){
+                fprintf(yyout, "\tCRVG\t%d\n", dsl + i); 
+            }
+        }
+        else{
+            int teste = buscaCampo(atomo);
+            for(int i = tam ; i > 0; i--){
+                fprintf(yyout, "\tCRVG\t%d\n",  tabSimb[teste].end + dsl + (i - 1) ); 
+            }
+        }
         empilha(tipo); 
-          naoEhRegistro = 0;  
+        naoEhRegistro = 0;  
     }
     | T_NUMERO
         { 
